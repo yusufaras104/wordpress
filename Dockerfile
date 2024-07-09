@@ -1,12 +1,15 @@
-# Use the official WordPress image as the base image
 FROM wordpress:latest
 
-# Install the PHP SOAP extension
-RUN apt-get update && apt-get install -y libxml2-dev && docker-php-ext-install soap
+# Copy custom configuration files
+COPY wordpress/apache.conf /etc/apache2/conf-available/servername.conf
+COPY wordpress/php.ini/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
-# Copy any custom configuration files (if necessary)
-COPY ./wordpress/php.ini/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+# Enable Apache modules and configurations
+RUN a2enmod rewrite && a2enconf servername
 
-# Copy the rest of your WordPress files (if necessary)
-COPY ./wordpress_files /var/www/html
+# Add wait-for-it script
+COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
+RUN chmod +x /usr/local/bin/wait-for-it.sh
 
+# Start script to wait for db before starting WordPress
+CMD ["wait-for-it.sh", "db:3306", "--", "docker-entrypoint.sh", "apache2-foreground"]
