@@ -1,17 +1,17 @@
-version: '3.8'
-
 services:
   wordpress:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5050:80"  # Mapping internal port 80 to external port 5050
+      - "5050:80"
     volumes:
-      - ./wordpress/php.ini/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini  # Adjust path as needed
+      - ./wordpress/php.ini/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
       - wordpress_files:/var/www/html
-      - ./wordpress/apache.conf:/etc/apache2/conf-available/servername.conf  # Adjust path as needed
+      - ./wordpress/apache.conf:/etc/apache2/conf-available/servername.conf
     restart: always
+    depends_on:
+      - db
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: wordpress
